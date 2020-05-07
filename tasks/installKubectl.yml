@@ -1,0 +1,6 @@
+---
+- name: Install kubectl
+  apt:
+    name: "kubectl={{ cluster_configs.version }}-00"
+    state: present
+    force: yes

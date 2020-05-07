@@ -1,0 +1,4 @@
+---
+- name: Change Hostname
+  hostname:
+      name: "{{ inventory_hostname }}.xip.io"

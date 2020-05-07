@@ -1,0 +1,42 @@
+# XenServer details where the VMs should be provisioned
+xenserver:
+  hostname: <IP/Hostname of the XenServer>
+  username: <Username of the XenServer>
+  password: <Password of the XenServer>
+vm:
+  # Specify the Template to use to provision the VMs
+  # See docs/Create_VM_Template.md to know how to create a VM template
+  template: <Name of the VM Template to use>
+  # Specify the Username and Password configured in the above template
+  template_username: <Username configured in the VM Template>
+  template_password: <Password configured in the VM Template>
+  os: 'ubuntu'
+  distro: 'bionic'
+  # This the name for Network 0 - the default configured in XenCenter GUI
+  network: 'Pool-wide network associated with eth0'
+  hdd_size: 20
+  ram: 2048
+  cpu: 2
+  cpu_cores_per_socket: 1
+ip_config:
+  ip:
+  # Specify the IPs to be assigned for the nodes as CIDR (IP/PREFIX)
+  - 10.0.0.11/24 # The first IP would be considered as Master
+  - 10.0.0.12/24 # Worker Node 1
+  - 10.0.0.13/24 # Worker Node 2
+  gateway: 10.0.0.1
+cluster_configs:
+  # Possible CNI list:
+  # TODO
+  cni: 'flannel'
+  # Currently only 'standalone' is supported
+  # HA control plane yet to come
+  control_plane: 'standalone'
+  # Specify the Kubernetes version you wish to install
+  # Version of KUBEADM, KUBELET, KUBECTL
+  version: '1.18.0'
+  # DO NOT MODIFY ANYTHING BEYOND THIS UNLESS YOU KNOW WHAT YOU ARE DOING
+  cni_configs:
+    flannel:
+      pod_cidr: '10.244.0.0/16'
+      apply_url: 'https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml'

@@ -1,0 +1,4 @@
+---
+- name: Disable SWAP
+  shell: |
+    swapoff -a

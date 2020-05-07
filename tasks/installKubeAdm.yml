@@ -1,0 +1,25 @@
+---
+- name: Install aptitude using apt
+  apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+- name: Add Kubernetes apt-key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes' APT repository
+  apt_repository:
+   repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+   state: present
+   filename: 'kubernetes'
+
+- name: Install kubelet
+  apt:
+    name: "kubelet={{ cluster_configs.version }}-00"
+    state: present
+    update_cache: true
+
+- name: Install kubeadm
+  apt:
+    name: "kubeadm={{ cluster_configs.version }}-00"
+    state: present

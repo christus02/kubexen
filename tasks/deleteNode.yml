@@ -1,0 +1,26 @@
+---
+- name: Delete a K8s Node
+  xenserver_guest:
+    hostname: "{{ xenserver.hostname }}"
+    username: "{{ xenserver.username }}"
+    password: "{{ xenserver.password }}"
+    validate_certs: no
+    name: "k8s-creator-node-{{ ip | ipaddr('address') }}"
+    state: absent
+    force: yes
+    template: "{{ vm.template }}"
+    disks:
+    - size_gb: "{{ vm.hdd_size }}"
+    hardware:
+      num_cpus: "{{ vm.cpu }}"
+      num_cpu_cores_per_socket: "{{ vm.cpu_cores_per_socket }}"
+      memory_mb: "{{ vm.ram }}"
+    cdrom:
+      type: none
+    networks:
+    - name: "{{ vm.network }}"
+      type: static
+      ip: "{{ ip }}"
+      gateway: "{{ ip_config.gateway }}"
+  delegate_to: localhost
+  register: node_delete

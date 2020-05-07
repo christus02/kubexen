@@ -1,0 +1,29 @@
+---
+- set_fact: cni="{{ cluster_configs.cni }}"
+- set_fact: pod_cidr="{{ cluster_configs.cni_configs[vars['cni']].pod_cidr }}"
+- set_fact: apply_url="{{ cluster_configs.cni_configs[vars['cni']].apply_url }}"
+
+- name: initialize the cluster
+  shell: kubeadm init --pod-network-cidr={{ pod_cidr }} >> cluster_initialized.txt
+  args:
+    chdir: $HOME
+    creates: cluster_initialized.txt
+
+- name: create .kube directory
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: copy admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: $HOME/.kube/config
+    remote_src: yes
+    force: yes
+
+- name: install Pod network
+  shell: kubectl apply -f {{ apply_url }} >> pod_network_setup.txt
+  args:
+    chdir: $HOME
+    creates: pod_network_setup.txt

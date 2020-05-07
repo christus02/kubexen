@@ -1,0 +1,109 @@
+---
+- name: K8s Creator - Creating a n-node K8s Cluster
+  hosts: localhost
+  tags:
+    - create
+  vars_files:
+    - vars/config.yml
+  tasks:
+  - include_tasks: tasks/createNode.yml
+    with_items: "{{ ip_config.ip }}"
+    loop_control:
+      loop_var: ip
+    tags:
+      - create
+  - name: Add the newly created VMs to all_nodes Inventory
+    add_host:
+      name: "{{ item | ipaddr('address') }}"
+      groups: all_nodes
+      ansible_connection: ssh
+      ansible_user: "{{ vm.template_username }}"
+      ansible_ssh_pass: "{{ vm.template_password }}"
+    with_items: "{{ ip_config.ip }}"
+  - set_fact: master_ip="{{ ip_config.ip[0] | ipaddr('address') }}"
+  - name: Add Master Node Inventory
+    add_host:
+      name: "{{ master_ip }}"
+      groups: master_nodes
+      ansible_connection: ssh
+      ansible_user: "{{ vm.template_username }}"
+      ansible_ssh_pass: "{{ vm.template_password }}"
+  - name: Add Worker Node Inventory
+    add_host:
+      name: "{{ item | ipaddr('address') }}"
+      groups: worker_nodes
+      ansible_connection: ssh
+      ansible_user: "{{ vm.template_username }}"
+      ansible_ssh_pass: "{{ vm.template_password }}"
+    with_items: "{{ ip_config.ip[1:] }}"
+  - pause:
+      minutes: 2
+
+- name: All Nodes Configs
+  hosts: all_nodes
+  tags:
+    - create
+  vars_files:
+    - vars/config.yml
+  tasks:
+  - include_tasks: tasks/changeHostname.yml
+    tags:
+      - create
+  - include_tasks: tasks/installDocker.yml
+    tags:
+      - create
+  - include_tasks: tasks/disableSwap.yml
+    tags:
+      - create
+  - include_tasks: tasks/installKubeAdm.yml
+    tags:
+      - create
+
+- name: Master Configs
+  hosts: master_nodes
+  tags:
+    - create
+  vars_files:
+    - vars/config.yml
+  tasks:
+  - include_tasks: tasks/installKubectl.yml
+    tags:
+      - create
+  - include_tasks: tasks/initKubeAdm.yml
+    tags:
+      - create
+  - name: Get join command from Master
+    shell: kubeadm token create --print-join-command
+    register: join_command_raw
+  - name: Store the Join Command
+    set_fact:
+      join_command: "{{ join_command_raw.stdout_lines[0] }}"
+
+- name: Join Worker Nodes
+  hosts: worker_nodes
+  tags:
+    - create
+  vars_files:
+    - vars/config.yml
+  tasks:
+  - name: Join cluster
+    shell: "{{ hostvars[groups['master_nodes'][0]].join_command }} >> node_joined.txt"
+    args:
+      chdir: $HOME
+      creates: node_joined.txt
+
+- name: K8s Creator - Deleting a n-node K8s Cluster
+  hosts: localhost
+  tags:
+    - never
+    - delete
+  vars_files:
+    - vars/config.yml
+  tasks:
+  - include_tasks: tasks/deleteNode.yml
+    with_items: "{{ ip_config.ip }}"
+    loop_control:
+      loop_var: ip
+    tags:
+      - never
+      - delete
