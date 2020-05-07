@@ -20,7 +20,7 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 
 A detailed guide on how to create a VM export is given [here](docs/Create_VM_Template.md)
 
-** Note ** Support for installing nodes from pre-built VM templates is work-in-progress.
+**Note** Support for installing nodes from pre-built VM templates is work-in-progress.
 
 ## Let the tool know your requirements for creating the Kubernetes cluster
 

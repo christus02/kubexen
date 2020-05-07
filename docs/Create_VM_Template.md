@@ -12,7 +12,7 @@ If you choose to go with the DHCP mode of installation, then you need not worry 
 
 Create a VM in the Xenserver using an ISO of the required linux distribution. You can choose the required CPU, Memory and Storage specs.
 
-**Note** DO not configure any static IP if you choose to use this VM as a template for static IP installation mode.
+**Note** Do not configure any static IP if you choose to use this VM as a template for static IP installation mode.
 
 ### Install Citrix Xen tools in the VM
 
